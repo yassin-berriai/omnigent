@@ -49,7 +49,7 @@ jobs:
           target: host
           platforms: linux/amd64
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/omnigent-host:accounts-fix3
+          tags: ghcr.io/${{ github.repository_owner }}/omnigent-host:accounts-fix4
           # The agy installer is always-latest; the Dockerfile hard-fails when
           # it drifts from the pinned version. agy (Antigravity harness CLI) is
           # irrelevant to this deploy's Claude Code use, so match the current
