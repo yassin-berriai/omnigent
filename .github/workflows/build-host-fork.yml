@@ -50,3 +50,10 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/omnigent-host:accounts-fix
+          # The agy installer is always-latest; the Dockerfile hard-fails when
+          # it drifts from the pinned version. agy (Antigravity harness CLI) is
+          # irrelevant to this deploy's Claude Code use, so match the current
+          # served version to clear the guard. Bump if the build fails on a
+          # newer agy again.
+          build-args: |
+            AGY_EXPECTED_VERSION=1.0.12
