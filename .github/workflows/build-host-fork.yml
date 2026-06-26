@@ -1,0 +1,52 @@
+# Fork-only: build the host image from this branch and push it to the
+# fork owner's GHCR, natively on an amd64 runner (no QEMU — the upstream
+# Dockerfile's `uv pip install` segfaults under QEMU emulation).
+#
+# Pushes ghcr.io/<owner>/omnigent-host:accounts-fix. After the first run
+# the GHCR package is PRIVATE — flip it to Public in the package settings
+# so Daytona can pull it, then set sandbox.daytona.image to this ref.
+name: Build host image (fork)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [render-deploy]
+    paths:
+      - 'omnigent/**'
+      - 'deploy/docker/Dockerfile'
+      - 'deploy/docker/entrypoint.py'
+      - 'sdks/**'
+      - 'pyproject.toml'
+      - 'setup.py'
+      - '.github/workflows/build-host-fork.yml'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-host:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5  # v4.1.0
+
+      - name: Log in to GHCR
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee  # v4.2.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build + push host image
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf  # v7.2.0
+        with:
+          context: .
+          file: deploy/docker/Dockerfile
+          target: host
+          platforms: linux/amd64
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/omnigent-host:accounts-fix
