@@ -32,6 +32,7 @@ import {
   PencilIcon,
   PinIcon,
   PinOffIcon,
+  PlugIcon,
   PlusIcon,
   SearchIcon,
   SettingsIcon,
@@ -97,6 +98,7 @@ import { useResizableSidebar } from "@/hooks/useResizableSidebar";
 import { useSessionSwitchHotkey } from "@/hooks/useSessionSwitchHotkey";
 import { usePinnedSessionHotkeys } from "@/hooks/usePinnedSessionHotkeys";
 import { absoluteTime, relativeTime } from "@/lib/relativeTime";
+import { ManageMcpServersDialog } from "./ManageMcpServersDialog";
 import { SettingsSidebarBody, useSettingsRoute } from "./settingsNav";
 import {
   type ActiveChatOverride,
@@ -187,6 +189,7 @@ function showArchivedToast() {
 export function Sidebar({ open, onClose, dragProgress = null }: SidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  const [mcpDialogOpen, setMcpDialogOpen] = useState(false);
   const [pinnedConversationIds, setPinnedConversationIds] = useState(readPinnedConversationIds);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -295,6 +298,7 @@ export function Sidebar({ open, onClose, dragProgress = null }: SidebarProps) {
   const effectiveOpen = open || dragging;
 
   return (
+    <>
     <aside
       aria-label="Conversations"
       className={cn(
@@ -464,6 +468,17 @@ export function Sidebar({ open, onClose, dragProgress = null }: SidebarProps) {
               Agents
             </Button>
             <ManageAgentsDialog open={manageAgentsOpen} onOpenChange={setManageAgentsOpen} />
+            {/* Manage reusable MCP servers, decoupled from any session. */}
+            <Button
+              type="button"
+              variant="ghost"
+              className="mt-1 w-full justify-start gap-2 text-sm"
+              data-testid="manage-mcp-button"
+              onClick={() => setMcpDialogOpen(true)}
+            >
+              <PlugIcon className="size-4 text-muted-foreground" />
+              MCP servers
+            </Button>
             {selectionMode ? (
               <BulkActionBar
                 selectedIds={selectedIds}
@@ -572,6 +587,8 @@ export function Sidebar({ open, onClose, dragProgress = null }: SidebarProps) {
         </>
       )}
     </aside>
+    <ManageMcpServersDialog open={mcpDialogOpen} onOpenChange={setMcpDialogOpen} />
+    </>
   );
 }
 
